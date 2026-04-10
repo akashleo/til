@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface TilInputProps {
   onSuccess: () => void;
@@ -13,20 +13,17 @@ export default function TilInput({ onSuccess }: TilInputProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content) return;
 
     setLoading(true);
     try {
-      const response = await fetch("/api/til", {
+      const res = await fetch("/api/til", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content,
-          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-        }),
+        body: JSON.stringify({ content, tags }),
       });
 
-      if (response.ok) {
+      if (res.ok) {
         setContent("");
         setTags("");
         onSuccess();
@@ -39,34 +36,24 @@ export default function TilInput({ onSuccess }: TilInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-zinc-50 p-6 rounded-xl border border-zinc-200">
-      <div>
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="What did you learn today?"
-          className="input min-h-[100px] resize-none"
-          required
-        />
-      </div>
-      <div className="flex gap-4 items-end">
-        <div className="flex-1">
-          <input
-            type="text"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="tags (comma separated)"
-            className="input"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading || !content.trim()}
-          className="btn btn-primary h-[42px] px-8"
-        >
-          {loading ? "Posting..." : "Post"}
-        </button>
-      </div>
+    <form onSubmit={handleSubmit} className="card">
+      <h3>What did you learn today?</h3>
+      <textarea
+        placeholder="Enter your TIL content..."
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        rows={3}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Tags (comma-separated)"
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+      />
+      <button type="submit" className="primary" disabled={loading}>
+        {loading ? "Saving..." : "Save TIL"}
+      </button>
     </form>
   );
 }

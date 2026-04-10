@@ -1,39 +1,42 @@
 "use client";
 
+import React from "react";
+
 interface TagFilterProps {
   tags: string[];
   selectedTag: string | null;
-  onSelect: (tag: string | null) => void;
+  onSelectTag: (tag: string | null) => void;
 }
 
-export default function TagFilter({ tags, selectedTag, onSelect }: TagFilterProps) {
+export default function TagFilter({
+  tags,
+  selectedTag,
+  onSelectTag,
+}: TagFilterProps) {
   if (tags.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
-      <button
-        onClick={() => onSelect(null)}
-        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-          selectedTag === null
-            ? "bg-black text-white"
-            : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-        }`}
-      >
-        All
-      </button>
-      {tags.map((tag) => (
+    <div style={{ marginBottom: "2rem" }}>
+      <p style={{ marginBottom: "0.5rem", fontWeight: "bold" }}>Filter by Tag:</p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
         <button
-          key={tag}
-          onClick={() => onSelect(tag)}
-          className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-            selectedTag === tag
-              ? "bg-black text-white"
-              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-          }`}
+          onClick={() => onSelectTag(null)}
+          className={selectedTag === null ? "primary" : ""}
+          style={{ fontSize: "0.8rem" }}
         >
-          #{tag}
+          All
         </button>
-      ))}
+        {tags.map((tag) => (
+          <button
+            key={tag}
+            onClick={() => onSelectTag(tag)}
+            className={selectedTag === tag ? "primary" : ""}
+            style={{ fontSize: "0.8rem" }}
+          >
+            #{tag}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

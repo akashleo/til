@@ -22,6 +22,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Content is required" }, { status: 400 });
   }
 
+  const tagList = tags
+    ? tags.split(",").map((tag: string) => tag.trim())
+    : [];
   const slug = slugify(content);
 
   const { data, error } = await supabase
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
     .insert([
       {
         content,
-        tags: tags || [],
+        tags: tagList,
         slug,
         is_published: false,
       },

@@ -5,15 +5,12 @@ export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const id = params.id;
-  const body = await request.json();
+  const { id } = params;
+  const updates = await request.json();
 
   const { data, error } = await supabase
     .from("tils")
-    .update({
-      ...body,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updates)
     .eq("id", id)
     .select()
     .single();
@@ -29,7 +26,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const id = params.id;
+  const { id } = params;
 
   const { error } = await supabase.from("tils").delete().eq("id", id);
 
@@ -37,5 +34,5 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ message: "Deleted successfully" });
+  return NextResponse.json({ success: true });
 }

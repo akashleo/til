@@ -3,17 +3,17 @@ import Container from "./Container";
 
 export default function Navbar() {
   return (
-    <nav className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <nav className="navbar">
       <Container>
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-xl font-bold tracking-tight">
-            TIL
+        <div className="navbar-content">
+          <Link href="/" className="nav-brand">
+            <strong>TIL</strong>
           </Link>
-          <div className="flex gap-6">
-            <Link href="/til" className="text-sm font-medium text-zinc-600 hover:text-black">
-              Blog
+          <div className="nav-links">
+            <Link href="/til" className="nav-link">
+              Public Blog
             </Link>
-            <Link href="/dashboard" className="text-sm font-medium text-zinc-600 hover:text-black">
+            <Link href="/dashboard" className="nav-link">
               Dashboard
             </Link>
           </div>

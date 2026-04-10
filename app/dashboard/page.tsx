@@ -1,22 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { TIL } from "@/types/til";
+import React, { useEffect, useState } from "react";
 import Container from "@/components/Container";
+import { TIL } from "@/types/til";
 import TilInput from "./components/TilInput";
 import TilList from "./components/TilList";
 import TagFilter from "./components/TagFilter";
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const [tils, setTils] = useState<TIL[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   const fetchTils = async () => {
     try {
-      const response = await fetch("/api/til");
-      if (response.ok) {
-        const data = await response.json();
+      const res = await fetch("/api/til");
+      const data = await res.json();
+      if (Array.isArray(data)) {
         setTils(data);
       }
     } catch (error) {
@@ -31,38 +31,65 @@ export default function DashboardPage() {
   }, []);
 
   const allTags = Array.from(new Set(tils.flatMap((til) => til.tags)));
+  
   const filteredTils = selectedTag
     ? tils.filter((til) => til.tags.includes(selectedTag))
     : tils;
 
-  return (
-    <Container className="py-10">
-      <div className="max-w-2xl mx-auto space-y-10">
-        <header>
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-zinc-500">Track your daily learnings privately.</p>
-        </header>
+  const calculateStreak = () => {
+    if (tils.length === 0) return 0;
+    
+    const dates = tils
+      .map((t) => new Date(t.created_at).toDateString())
+      .filter((value, index, self) => self.indexOf(value) === index);
+    
+    let streak = 0;
+    const today = new Date().toDateString();
+    let currentCheck = new Date();
+    
+    // If no TIL today, check if there was one yesterday to keep streak alive
+    if (dates[0] !== today) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      if (dates[0] !== yesterday.toDateString()) return 0;
+      currentCheck = yesterday;
+    }
 
+    for (const date of dates) {
+      if (date === currentCheck.toDateString()) {
+        streak++;
+        currentCheck.setDate(currentCheck.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const streak = calculateStreak();
+
+  return (
+    <Container>
+      <div style={{ paddingBottom: "4rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2rem" }}>
+          <h1>Dashboard</h1>
+          <div className="badge badge-published" style={{ padding: "0.5rem 1rem" }}>
+            🔥 {streak} Day Streak
+          </div>
+        </div>
+        
         <TilInput onSuccess={fetchTils} />
 
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Your TILs</h2>
-            {tils.length > 0 && (
-              <span className="text-sm text-zinc-400">
-                {tils.length} total
-              </span>
-            )}
-          </div>
-
-          <TagFilter
-            tags={allTags}
-            selectedTag={selectedTag}
-            onSelect={setSelectedTag}
+        <div style={{ marginTop: "3rem" }}>
+          <h2>Your Learnings</h2>
+          <TagFilter 
+            tags={allTags} 
+            selectedTag={selectedTag} 
+            onSelectTag={setSelectedTag} 
           />
-
+          
           {loading ? (
-            <div className="text-center py-10 text-zinc-400">Loading...</div>
+            <p>Loading...</p>
           ) : (
             <TilList tils={filteredTils} onUpdate={fetchTils} />
           )}

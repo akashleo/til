@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { TIL } from "@/types/til";
 import { formatDate } from "@/lib/utils";
-import { Trash2, Edit2, Globe, Lock } from "lucide-react";
 
 interface TilItemProps {
   til: TIL;
@@ -19,37 +18,38 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/til/${til.id}`, {
+      const tagList = tags.split(",").map((t) => t.trim());
+      const res = await fetch(`/api/til/${til.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content,
-          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-        }),
+        body: JSON.stringify({ content, tags: tagList }),
       });
 
-      if (response.ok) {
+      if (res.ok) {
         setIsEditing(false);
         onUpdate();
       }
     } catch (error) {
-      console.error("Failed to update TIL", error);
+      console.error("Update failed", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleTogglePublish = async () => {
+  const togglePublish = async () => {
     setLoading(true);
     try {
-      await fetch(`/api/til/${til.id}`, {
+      const res = await fetch(`/api/til/${til.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_published: !til.is_published }),
       });
-      onUpdate();
+
+      if (res.ok) {
+        onUpdate();
+      }
     } catch (error) {
-      console.error("Failed to toggle publish status", error);
+      console.error("Toggle publish failed", error);
     } finally {
       setLoading(false);
     }
@@ -60,88 +60,86 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
 
     setLoading(true);
     try {
-      await fetch(`/api/til/${til.id}`, { method: "DELETE" });
-      onUpdate();
+      const res = await fetch(`/api/til/${til.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        onUpdate();
+      }
     } catch (error) {
-      console.error("Failed to delete TIL", error);
+      console.error("Delete failed", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div className="card">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "0.5rem",
+        }}
+      >
+        <span
+          className={`badge ${
+            til.is_published ? "badge-published" : "badge-draft"
+          }`}
+        >
+          {til.is_published ? "Published" : "Draft"}
+        </span>
+        <small style={{ color: "var(--secondary)" }}>
+          {formatDate(til.created_at)}
+        </small>
+      </div>
+
       {isEditing ? (
-        <div className="space-y-3">
+        <div>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="input min-h-[80px]"
+            rows={3}
           />
           <input
             type="text"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            className="input"
-            placeholder="tags (comma separated)"
           />
-          <div className="flex gap-2">
+          <div style={{ display: "flex", gap: "0.5rem" }}>
             <button
               onClick={handleUpdate}
+              className="primary"
               disabled={loading}
-              className="btn btn-primary text-sm py-1"
             >
               Save
             </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="btn btn-secondary text-sm py-1"
-            >
-              Cancel
-            </button>
+            <button onClick={() => setIsEditing(false)}>Cancel</button>
           </div>
         </div>
       ) : (
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <p className="text-zinc-800 whitespace-pre-wrap">{til.content}</p>
-            <div className="flex gap-1 ml-4 shrink-0">
-              <button
-                onClick={handleTogglePublish}
-                disabled={loading}
-                className="p-1.5 hover:bg-zinc-100 rounded-md text-zinc-500 hover:text-black"
-                title={til.is_published ? "Unpublish" : "Publish"}
-              >
-                {til.is_published ? <Globe size={18} /> : <Lock size={18} />}
-              </button>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-1.5 hover:bg-zinc-100 rounded-md text-zinc-500 hover:text-black"
-                title="Edit"
-              >
-                <Edit2 size={18} />
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={loading}
-                className="p-1.5 hover:bg-zinc-100 rounded-md text-zinc-500 hover:text-red-600"
-                title="Delete"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 items-center">
+        <>
+          <p style={{ whiteSpace: "pre-wrap", marginBottom: "1rem" }}>
+            {til.content}
+          </p>
+          <div style={{ marginBottom: "1rem" }}>
             {til.tags.map((tag) => (
-              <span key={tag} className="badge bg-zinc-100 text-zinc-600">
+              <span key={tag} className="tag">
                 #{tag}
               </span>
             ))}
-            <span className="text-[10px] text-zinc-400 ml-auto">
-              {formatDate(til.created_at)}
-            </span>
           </div>
-        </div>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button onClick={() => setIsEditing(true)}>Edit</button>
+            <button onClick={togglePublish}>
+              {til.is_published ? "Unpublish" : "Publish"}
+            </button>
+            <button onClick={handleDelete} className="danger">
+              Delete
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-export interface TIL {
+export type TIL = {
   id: string;
   content: string;
   tags: string[];
@@ -6,7 +6,9 @@ export interface TIL {
   is_published: boolean;
   created_at: string;
   updated_at: string;
-}
+};
 
-export type CreateTILInput = Pick<TIL, "content" | "tags">;
-export type UpdateTILInput = Partial<Pick<TIL, "content" | "tags" | "is_published">>;
+export type CreateTILInput = {
+  content: string;
+  tags: string;
+};

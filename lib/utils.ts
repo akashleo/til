@@ -1,27 +1,20 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 export function slugify(text: string): string {
   const baseSlug = text
-    .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, "-")     // Replace spaces with -
-    .replace(/[^\w-]+/g, "")  // Remove all non-word chars
-    .replace(/--+/g, "-")     // Replace multiple - with single -
-    .substring(0, 50);        // Limit length
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .substring(0, 50); // Limit length
 
-  return `${baseSlug}-${Date.now()}`;
+  const timestamp = Date.now().toString(36);
+  return `${baseSlug}-${timestamp}`;
 }
 
-export function formatDate(dateString: string) {
+export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
     month: "long",
     day: "numeric",
-    year: "numeric",
   });
 }

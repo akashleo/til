@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { TIL } from "@/types/til";
 import TilItem from "./TilItem";
 
@@ -11,14 +12,14 @@ interface TilListProps {
 export default function TilList({ tils, onUpdate }: TilListProps) {
   if (tils.length === 0) {
     return (
-      <div className="text-center py-12 border-2 border-dashed rounded-xl border-zinc-200">
-        <p className="text-zinc-500">No TILs yet. Start by creating one!</p>
+      <div style={{ textAlign: "center", padding: "2rem", color: "var(--secondary)" }}>
+        No TILs yet. Start learning!
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {tils.map((til) => (
         <TilItem key={til.id} til={til} onUpdate={onUpdate} />
       ))}
