@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { createClient } from "@/utils/supabase/middleware";
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || "fallback-secret-at-least-32-chars-long"
 );
 
 export async function middleware(request: NextRequest) {
-  const session = request.cookies.get("admin_session")?.value;
+  const { supabase, supabaseResponse } = createClient(request);
+  
+  // Refresh session if needed
+  await supabase.auth.getUser();
+
+  const session = request.cookies.get("authToken")?.value;
   const { pathname } = request.nextUrl;
 
   let isValid = false;
@@ -39,7 +45,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 export const config = {

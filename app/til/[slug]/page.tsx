@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "@/components/Container";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 import { formatDate } from "@/lib/utils";
 
 export const revalidate = 60;
@@ -13,10 +14,13 @@ interface TilPageProps {
 }
 
 export default async function TilPage({ params }: TilPageProps) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  
   const { slug } = params;
 
   const { data: til, error } = await supabase
-    .from("tils")
+    .from("til")
     .select("*")
     .eq("slug", slug)
     .single();

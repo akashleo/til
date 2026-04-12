@@ -1,14 +1,18 @@
 import Link from "next/link";
 import Container from "@/components/Container";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 import { formatDate } from "@/lib/utils";
 import { TIL } from "@/types/til";
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function PublicBlog() {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+
   const { data: tils, error } = await supabase
-    .from("tils")
+    .from("til")
     .select("*")
     .eq("is_published", true)
     .order("created_at", { ascending: false });

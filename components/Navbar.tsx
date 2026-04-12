@@ -4,7 +4,7 @@ import Container from "./Container";
 import LogoutButton from "./LogoutButton";
 
 export default function Navbar() {
-  const session = cookies().get("admin_session");
+  const session = cookies().get("authToken");
   const isLoggedIn = !!session?.value;
 
   return (

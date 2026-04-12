@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     if (password === process.env.ADMIN_PASSWORD) {
       const token = await signJWT({ role: "admin" });
 
-      cookies().set("admin_session", token, {
+      cookies().set("authToken", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

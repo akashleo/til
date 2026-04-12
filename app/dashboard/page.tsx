@@ -14,7 +14,7 @@ export default function Dashboard() {
 
   const fetchTils = async () => {
     try {
-      const res = await fetch("/api/til");
+      const res = await fetch("/api/til?is_published=false");
       const data = await res.json();
       if (Array.isArray(data)) {
         setTils(data);
@@ -81,7 +81,7 @@ export default function Dashboard() {
         <TilInput onSuccess={fetchTils} />
 
         <div style={{ marginTop: "3rem" }}>
-          <h2>Your Learnings</h2>
+          <h2>Unpublished Learnings</h2>
           <TagFilter 
             tags={allTags} 
             selectedTag={selectedTag} 
