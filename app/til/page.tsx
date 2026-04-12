@@ -41,10 +41,13 @@ export default async function PublicBlog() {
                 </small>
                 <h2 style={{ margin: "0.5rem 0" }}>
                   <Link href={`/til/${til.slug}`} style={{ color: "var(--primary)" }}>
-                    {til.content.substring(0, 100)}
-                    {til.content.length > 100 ? "..." : ""}
+                    {til.title}
                   </Link>
                 </h2>
+                <p style={{ color: "var(--secondary)", marginBottom: "1rem" }}>
+                  {til.content.substring(0, 150)}
+                  {til.content.length > 150 ? "..." : ""}
+                </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                   {til.tags.map((tag) => (
                     <span key={tag} className="tag">

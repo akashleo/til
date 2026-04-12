@@ -44,7 +44,7 @@ export default async function TilPage({ params }: TilPageProps) {
           </div>
           
           <h1 style={{ marginBottom: "2rem", lineHeight: "1.3" }}>
-            {til.content.split("\n")[0]}
+            {til.title}
           </h1>
           
           <div style={{ fontSize: "1.2rem", whiteSpace: "pre-wrap", marginBottom: "2rem" }}>

@@ -7,23 +7,25 @@ interface TilInputProps {
 }
 
 export default function TilInput({ onSuccess }: TilInputProps) {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content) return;
+    if (!title || !content) return;
 
     setLoading(true);
     try {
       const res = await fetch("/api/til", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, tags }),
+        body: JSON.stringify({ title, content, tags }),
       });
 
       if (res.ok) {
+        setTitle("");
         setContent("");
         setTags("");
         onSuccess();
@@ -38,6 +40,13 @@ export default function TilInput({ onSuccess }: TilInputProps) {
   return (
     <form onSubmit={handleSubmit} className="card">
       <h3>What did you learn today?</h3>
+      <input
+        type="text"
+        placeholder="Title..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
       <textarea
         placeholder="Enter your TIL content..."
         value={content}

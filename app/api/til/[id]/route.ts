@@ -3,6 +3,8 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
+import { slugify } from "@/lib/utils";
+
 const supabaseAdmin = createSupabaseClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -23,6 +25,10 @@ export async function PATCH(
 
   const { id } = params;
   const updates = await request.json();
+
+  if (updates.title) {
+    updates.slug = slugify(updates.title);
+  }
 
   const { data, error } = await supabaseAdmin
     .from("til")

@@ -1,5 +1,6 @@
 export type TIL = {
   id: string;
+  title: string;
   content: string;
   tags: string[];
   slug: string;
@@ -9,6 +10,7 @@ export type TIL = {
 };
 
 export type CreateTILInput = {
+  title: string;
   content: string;
   tags: string;
 };

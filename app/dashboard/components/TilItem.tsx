@@ -11,6 +11,7 @@ interface TilItemProps {
 
 export default function TilItem({ til, onUpdate }: TilItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(til.title);
   const [content, setContent] = useState(til.content);
   const [tags, setTags] = useState(til.tags.join(", "));
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
       const res = await fetch(`/api/til/${til.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, tags: tagList }),
+        body: JSON.stringify({ title, content, tags: tagList }),
       });
 
       if (res.ok) {
@@ -97,6 +98,13 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
 
       {isEditing ? (
         <div>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+            style={{ marginBottom: "0.5rem" }}
+          />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -120,6 +128,7 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
         </div>
       ) : (
         <>
+          <h3 style={{ margin: "0 0 0.5rem 0" }}>{til.title}</h3>
           <p style={{ whiteSpace: "pre-wrap", marginBottom: "1rem" }}>
             {til.content}
           </p>

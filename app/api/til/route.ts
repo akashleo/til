@@ -47,21 +47,22 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { content, tags } = await request.json();
+  const { title, content, tags } = await request.json();
 
-  if (!content) {
-    return NextResponse.json({ error: "Content is required" }, { status: 400 });
+  if (!title || !content) {
+    return NextResponse.json({ error: "Title and Content are required" }, { status: 400 });
   }
 
   const tagList = tags
     ? tags.split(",").map((tag: string) => tag.trim())
     : [];
-  const slug = slugify(content);
+  const slug = slugify(title);
 
   const { data, error } = await supabaseAdmin
     .from("til")
     .insert([
       {
+        title,
         content,
         tags: tagList,
         slug,
