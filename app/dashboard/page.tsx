@@ -6,11 +6,14 @@ import { TIL } from "@/types/til";
 import TilInput from "./components/TilInput";
 import TilList from "./components/TilList";
 import TagFilter from "./components/TagFilter";
+import ContributionHeatmap from "./components/ContributionHeatmap";
 
 export default function Dashboard() {
   const [tils, setTils] = useState<TIL[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedDateTils, setSelectedDateTils] = useState<TIL[] | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const fetchTils = async () => {
     try {
@@ -68,6 +71,16 @@ export default function Dashboard() {
 
   const streak = calculateStreak();
 
+  const handleDayClick = (date: string, dayTils: TIL[]) => {
+    setSelectedDate(date);
+    setSelectedDateTils(dayTils);
+  };
+
+  const clearSelectedDate = () => {
+    setSelectedDate(null);
+    setSelectedDateTils(null);
+  };
+
   return (
     <Container>
       <div style={{ paddingBottom: "4rem" }}>
@@ -78,7 +91,27 @@ export default function Dashboard() {
           </div>
         </div>
         
+        <div style={{ marginBottom: "2rem" }}>
+          <ContributionHeatmap tils={tils} onDayClick={handleDayClick} />
+        </div>
+
         <TilInput onSuccess={fetchTils} />
+
+        {selectedDateTils && selectedDate && (
+          <div style={{ marginTop: "2rem" }}>
+            <div className="card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <h3 style={{ margin: 0 }}>
+                  TILs for {new Date(selectedDate + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                </h3>
+                <button onClick={clearSelectedDate} style={{ margin: 0 }}>
+                  Close
+                </button>
+              </div>
+              <TilList tils={selectedDateTils} onUpdate={fetchTils} />
+            </div>
+          </div>
+        )}
 
         <div style={{ marginTop: "3rem" }}>
           <h2>Unpublished Learnings</h2>
