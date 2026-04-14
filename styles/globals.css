@@ -389,15 +389,32 @@ input::placeholder, textarea::placeholder {
   margin-bottom: 0;
 }
 
-.markdown a {
+.markdown a,
+.markdown-link {
   color: var(--accent);
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, color 0.2s;
 }
 
-.markdown a:hover {
+.markdown a:hover,
+.markdown-link:hover {
+  color: var(--accent-hover);
   border-bottom-color: var(--accent);
+}
+
+.markdown-link-external::after {
+  content: "↗";
+  display: inline-block;
+  margin-left: 0.25em;
+  font-size: 0.85em;
+  opacity: 0.7;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.markdown-link-external:hover::after {
+  transform: translate(1px, -1px);
+  opacity: 1;
 }
 
 .markdown img {

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -28,6 +29,41 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize]}
         components={{
+          a({ href, children, ...props }) {
+            if (!href) return <span>{children}</span>;
+
+            const isInternal = href.startsWith("/") && !href.startsWith("//");
+            const isSafe =
+              href.startsWith("/") ||
+              href.startsWith("http://") ||
+              href.startsWith("https://") ||
+              href.startsWith("mailto:") ||
+              href.startsWith("tel:");
+
+            if (!isSafe) {
+              return <span>{children}</span>;
+            }
+
+            if (isInternal) {
+              return (
+                <Link href={href} className="markdown-link" {...props}>
+                  {children}
+                </Link>
+              );
+            }
+
+            return (
+              <a
+                href={href}
+                className="markdown-link markdown-link-external"
+                target="_blank"
+                rel="noopener noreferrer"
+                {...props}
+              >
+                {children}
+              </a>
+            );
+          },
           code({ className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || "");
             const language = match ? match[1] : "";

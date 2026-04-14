@@ -12,6 +12,7 @@ import {
   Edit3,
   Terminal,
   Quote,
+  Link as LinkIcon,
 } from "lucide-react";
 
 interface TilInputProps {
@@ -23,7 +24,8 @@ type InsertAction =
   | "code-block"
   | "inline-code"
   | "list"
-  | "quote";
+  | "quote"
+  | "link";
 
 interface InsertConfig {
   prefix: string;
@@ -41,6 +43,7 @@ const INSERT_CONFIGS: Record<InsertAction, InsertConfig> = {
   "inline-code": { prefix: "`", suffix: "`", placeholder: "code" },
   list: { prefix: "- ", suffix: "", placeholder: "List item" },
   quote: { prefix: "> ", suffix: "", placeholder: "Quote" },
+  link: { prefix: "[", suffix: "](url)", placeholder: "link text" },
 };
 
 // Utility: Insert text at cursor position or wrap selected text
@@ -171,9 +174,50 @@ export default function TilInput({ onSuccess }: TilInputProps) {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
+    if (action === "link") {
+      handleLinkInsert();
+      return;
+    }
+
     const config = INSERT_CONFIGS[action];
     const newValue = insertAtCursor(textarea, config);
     setContent(newValue);
+  }, []);
+
+  const handleLinkInsert = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { selectionStart, selectionEnd, value } = textarea;
+    const selectedText = value.substring(selectionStart, selectionEnd);
+
+    const url = window.prompt("Enter URL:", "https://");
+    if (!url) return;
+
+    const isSafe =
+      url.startsWith("/") ||
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("mailto:") ||
+      url.startsWith("tel:");
+
+    if (!isSafe) {
+      alert("Invalid URL. Only http, https, mailto, tel, and internal paths are allowed.");
+      return;
+    }
+
+    const linkText = selectedText || "link text";
+    const newText =
+      value.substring(0, selectionStart) +
+      `[${linkText}](${url})` +
+      value.substring(selectionEnd);
+
+    textarea.value = newText;
+    setContent(newText);
+
+    textarea.focus();
+    const cursorPos = selectionStart + linkText.length + url.length + 4;
+    textarea.setSelectionRange(cursorPos, cursorPos);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -233,6 +277,11 @@ export default function TilInput({ onSuccess }: TilInputProps) {
               icon={<Quote size={16} />}
               label="insert quote"
             />
+            <ToolbarButton
+              onClick={() => handleInsert("link")}
+              icon={<LinkIcon size={16} />}
+              label="insert link"
+            />
           </div>
 
           <div className="toolbar-divider" />
@@ -275,7 +324,7 @@ export default function TilInput({ onSuccess }: TilInputProps) {
           ) : (
             <textarea
               ref={textareaRef}
-              placeholder="write your til here...&#10;&#10;use markdown for formatting:&#10;- ## for headings&#10;- `backticks` for inline code&#10;- ``` for code blocks&#10;- - for lists&#10;- > for quotes"
+              placeholder="write your til here...&#10;&#10;use markdown for formatting:&#10;- ## for headings&#10;- `backticks` for inline code&#10;- ``` for code blocks&#10;- - for lists&#10;- > for quotes&#10;- [text](url) for links"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}

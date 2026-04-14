@@ -27,9 +27,7 @@ export default async function PublicBlog() {
 
   return (
     <Container>
-      <div style={{ paddingBottom: "4rem" }}>
-        <h1 style={{ marginBottom: "2rem" }}>latest learnings</h1>
-        
+      <div style={{ paddingBottom: "4rem" }}>        
         {tils?.length === 0 ? (
           <p style={{ color: "var(--secondary)" }}>no published tils yet.</p>
         ) : (
