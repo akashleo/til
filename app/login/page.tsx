@@ -39,19 +39,19 @@ export default function LoginPage() {
   return (
     <Container>
       <div style={{ maxWidth: "400px", margin: "100px auto" }}>
-        <h1 style={{ textAlign: "center", marginBottom: "2rem" }}>Admin Login</h1>
+        <h1 style={{ textAlign: "center", marginBottom: "2rem" }}>login</h1>
         <div className="card">
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: "1rem" }}>
               <label htmlFor="password" style={{ display: "block", marginBottom: "0.5rem" }}>
-                Password
+                security string
               </label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
+                placeholder="enter security string"
                 required
                 autoFocus
               />
@@ -67,7 +67,7 @@ export default function LoginPage() {
               style={{ width: "100%" }}
               disabled={loading}
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "logging in..." : "login"}
             </button>
           </form>
         </div>

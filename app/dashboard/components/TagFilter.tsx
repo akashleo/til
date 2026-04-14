@@ -16,22 +16,20 @@ export default function TagFilter({
   if (tags.length === 0) return null;
 
   return (
-    <div style={{ marginBottom: "2rem" }}>
-      <p style={{ marginBottom: "0.5rem", fontWeight: "bold" }}>Filter by Tag:</p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+    <div className="tag-filter-container">
+      <p className="tag-filter-label">filter by tag:</p>
+      <div className="tag-filter-buttons">
         <button
           onClick={() => onSelectTag(null)}
-          className={selectedTag === null ? "primary" : ""}
-          style={{ fontSize: "0.8rem" }}
+          className={selectedTag === null ? "primary tag-filter-btn" : "tag-filter-btn"}
         >
-          All
+          all
         </button>
         {tags.map((tag) => (
           <button
             key={tag}
             onClick={() => onSelectTag(tag)}
-            className={selectedTag === tag ? "primary" : ""}
-            style={{ fontSize: "0.8rem" }}
+            className={selectedTag === tag ? "primary tag-filter-btn" : "tag-filter-btn"}
           >
             #{tag}
           </button>

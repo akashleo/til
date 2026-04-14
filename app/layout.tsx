@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 import Navbar from "@/components/Navbar";
+import { sora, recursive } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Today I Learned",
@@ -13,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${sora.variable} ${recursive.variable}`}>
       <body>
         <Navbar />
         <main>{children}</main>

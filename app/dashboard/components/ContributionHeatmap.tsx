@@ -16,15 +16,6 @@ interface DayData {
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Color scale for contribution levels (GitHub-style green)
-const COLOR_SCALE = {
-  0: "#ebedf0", // No contributions - light gray
-  1: "#9be9a8", // Low - light green
-  2: "#40c463", // Medium - medium green
-  3: "#30a14e", // High - darker green
-  4: "#216e39", // Very high - darkest green
-};
-
 // Normalize date to YYYY-MM-DD format using UTC to avoid timezone issues
 function normalizeDate(dateString: string): string {
   const date = new Date(dateString);
@@ -34,13 +25,13 @@ function normalizeDate(dateString: string): string {
   return `${year}-${month}-${day}`;
 }
 
-// Get color based on count
-function getColor(count: number): string {
-  if (count === 0) return COLOR_SCALE[0];
-  if (count === 1) return COLOR_SCALE[1];
-  if (count === 2) return COLOR_SCALE[2];
-  if (count === 3) return COLOR_SCALE[3];
-  return COLOR_SCALE[4];
+// Get heatmap level class based on count
+function getLevelClass(count: number): string {
+  if (count === 0) return "heatmap-level-0";
+  if (count === 1) return "heatmap-level-1";
+  if (count === 2) return "heatmap-level-2";
+  if (count === 3) return "heatmap-level-3";
+  return "heatmap-level-4";
 }
 
 // Format date for display
@@ -68,7 +59,6 @@ function ContributionHeatmap({
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleWeekCount, setVisibleWeekCount] = useState<number | null>(null);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   // Transform TIL data into date -> count map
   const dateCountMap = useMemo(() => {
@@ -152,24 +142,16 @@ function ContributionHeatmap({
       // Always show at least 12 weeks, but prefer to show all if they fit
       setVisibleWeekCount(Math.min(maxWeeks, allWeeks.length));
     };
-
-    const handleResize = () => {
-      calculateVisibleWeeks();
-      setIsSmallScreen(window.innerWidth < 640);
-    };
     
-    handleResize();
+    calculateVisibleWeeks();
     
     const resizeObserver = new ResizeObserver(calculateVisibleWeeks);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
     
-    window.addEventListener("resize", handleResize);
-    
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("resize", handleResize);
     };
   }, [allWeeks.length]);
 
@@ -262,10 +244,9 @@ function ContributionHeatmap({
   );
 
   return (
-    <div ref={containerRef} style={{ border: "1px solid var(--border)", borderRadius: "8px", padding: "1.5rem", marginBottom: "1rem" }}>
-      <div style={{ display: "flex", flexDirection: isSmallScreen ? "column" : "row", alignItems: isSmallScreen ? "flex-start" : "center", justifyContent: "space-between", marginBottom: "1rem", gap: isSmallScreen ? "0.5rem" : "0" }}>
-        <h3 style={{ margin: 0, fontSize: isSmallScreen ? "0.875rem" : "1rem" }}>Contribution Activity</h3>
-        <div style={{ display: "flex", gap: isSmallScreen ? "0.75rem" : "1rem", fontSize: isSmallScreen ? "0.75rem" : "0.875rem", color: "var(--secondary)" }}>
+    <div ref={containerRef} className="heatmap-container">
+      <div className="heatmap-header">
+        <div className="heatmap-stats">
           <span>
             <strong>{stats.totalContributions}</strong> contributions
           </span>
@@ -279,16 +260,12 @@ function ContributionHeatmap({
       </div>
 
       {/* Month labels */}
-      <div style={{ display: "flex", marginBottom: "0.25rem", position: "relative", height: "1rem" }}>
+      <div className="heatmap-months">
         {monthLabels.map((label, index) => (
           <div
             key={index}
-            style={{
-              position: "absolute",
-              left: `${label.weekIndex * 14 + 8}px`,
-              color: "var(--secondary)",
-              fontSize: "0.75rem",
-            }}
+            className="heatmap-month-label"
+            style={{ left: `${label.weekIndex * 14 + 8}px` }}
           >
             {label.month}
           </div>
@@ -296,20 +273,11 @@ function ContributionHeatmap({
       </div>
 
       {/* Heatmap grid */}
-      <div style={{ display: "flex" }}>
-        {/* Day labels */}
-        {/* <div style={{ display: "flex", flexDirection: "column", marginRight: "0.5rem", fontSize: "0.75rem", color: "var(--secondary)" }}>
-          {DAYS_OF_WEEK.filter((_, i) => i % 2 === 1).map((day) => (
-            <div key={day} style={{ height: "12px", display: "flex", alignItems: "center", marginBottom: "3px" }}>
-              {day}
-            </div>
-          ))}
-        </div> */}
-
+      <div className="heatmap-grid-wrapper">
         {/* Grid */}
-        <div style={{ display: "flex", gap: "3px" }}>
+        <div className="heatmap-grid">
           {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+            <div key={weekIndex} className="heatmap-week">
               {week.map((day, dayIndex) =>
                 day ? (
                   <div
@@ -318,25 +286,10 @@ function ContributionHeatmap({
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
                     onClick={() => handleDayClick(day)}
-                    style={{
-                      width: "12px",
-                      height: "12px",
-                      borderRadius: "2px",
-                      cursor: day.count > 0 ? "pointer" : "default",
-                      backgroundColor: getColor(day.count),
-                      opacity: day.count > 0 ? 1 : 0.7,
-                      transition: "all 0.2s",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.outline = "1px solid #666";
-                      e.currentTarget.style.outlineOffset = "1px";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.outline = "none";
-                    }}
+                    className={`heatmap-cell ${getLevelClass(day.count)}`}
                   />
                 ) : (
-                  <div key={`${weekIndex}-${dayIndex}`} style={{ width: "12px", height: "12px" }} />
+                  <div key={`${weekIndex}-${dayIndex}`} className="heatmap-cell-empty" />
                 )
               )}
             </div>
@@ -345,44 +298,35 @@ function ContributionHeatmap({
       </div>
 
       {/* Legend */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginTop: "1rem", gap: "0.5rem", fontSize: "0.75rem", color: "var(--secondary)" }}>
-        <span>Less</span>
-        <div style={{ display: "flex", gap: "3px" }}>
-          <div style={{ width: "12px", height: "12px", borderRadius: "2px", backgroundColor: COLOR_SCALE[0] }} />
-          <div style={{ width: "12px", height: "12px", borderRadius: "2px", backgroundColor: COLOR_SCALE[1] }} />
-          <div style={{ width: "12px", height: "12px", borderRadius: "2px", backgroundColor: COLOR_SCALE[2] }} />
-          <div style={{ width: "12px", height: "12px", borderRadius: "2px", backgroundColor: COLOR_SCALE[3] }} />
-          <div style={{ width: "12px", height: "12px", borderRadius: "2px", backgroundColor: COLOR_SCALE[4] }} />
+      <div className="heatmap-legend">
+        <span>less</span>
+        <div className="heatmap-legend-cells">
+          <div className="heatmap-cell heatmap-level-0" />
+          <div className="heatmap-cell heatmap-level-1" />
+          <div className="heatmap-cell heatmap-level-2" />
+          <div className="heatmap-cell heatmap-level-3" />
+          <div className="heatmap-cell heatmap-level-4" />
         </div>
-        <span>More</span>
+        <span>more</span>
       </div>
 
       {/* Tooltip */}
       {hoveredDay && (
         <div
+          className="heatmap-tooltip"
           style={{
-            position: "fixed",
-            zIndex: 50,
-            padding: "0.5rem 0.75rem",
-            fontSize: "0.875rem",
-            borderRadius: "4px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-            pointerEvents: "none",
             left: tooltipPosition.x + 12,
             top: tooltipPosition.y - 40,
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-            color: "white",
-            whiteSpace: "nowrap",
           }}
         >
-          <div style={{ fontWeight: 600 }}>{formatDisplayDate(hoveredDay.date)}</div>
+          <div className="heatmap-tooltip-date">{formatDisplayDate(hoveredDay.date)}</div>
           <div>
             {hoveredDay.count === 0
-              ? "No contributions"
+              ? "no contributions"
               : `${hoveredDay.count} contribution${hoveredDay.count !== 1 ? "s" : ""}`}
           </div>
           {hoveredDay.count > 0 && onDayClick && (
-            <div style={{ fontSize: "0.75rem", opacity: 0.75, marginTop: "0.25rem" }}>Click to view</div>
+            <div className="heatmap-tooltip-hint">click to view</div>
           )}
         </div>
       )}

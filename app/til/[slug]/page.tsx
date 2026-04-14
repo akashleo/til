@@ -34,13 +34,13 @@ export default async function TilPage({ params }: TilPageProps) {
     <Container>
       <div style={{ paddingBottom: "4rem" }}>
         <Link href="/til" style={{ color: "var(--secondary)", display: "block", marginBottom: "2rem" }}>
-          ← Back to all TILs
+          ← back to all tils
         </Link>
         
         <article>
           <div style={{ marginBottom: "1rem" }}>
             <small style={{ color: "var(--secondary)" }}>
-              Published on {formatDate(til.created_at)}
+              published on {formatDate(til.created_at)}
             </small>
           </div>
           

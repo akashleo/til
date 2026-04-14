@@ -20,7 +20,7 @@ export default async function PublicBlog() {
   if (error) {
     return (
       <Container>
-        <p>Error loading TILs: {error.message}</p>
+        <p>error loading tils: {error.message}</p>
       </Container>
     );
   }
@@ -28,10 +28,10 @@ export default async function PublicBlog() {
   return (
     <Container>
       <div style={{ paddingBottom: "4rem" }}>
-        <h1 style={{ marginBottom: "2rem" }}>Latest Learnings</h1>
+        <h1 style={{ marginBottom: "2rem" }}>latest learnings</h1>
         
         {tils?.length === 0 ? (
-          <p style={{ color: "var(--secondary)" }}>No published TILs yet.</p>
+          <p style={{ color: "var(--secondary)" }}>no published tils yet.</p>
         ) : (
           <div>
             {tils?.map((til: TIL) => (

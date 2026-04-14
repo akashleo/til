@@ -57,7 +57,7 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this TIL?")) return;
+    if (!confirm("are you sure you want to delete this til?")) return;
 
     setLoading(true);
     try {
@@ -77,21 +77,15 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
 
   return (
     <div className="card">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "0.5rem",
-        }}
-      >
+      <div className="til-item-header">
         <span
           className={`badge ${
             til.is_published ? "badge-published" : "badge-draft"
           }`}
         >
-          {til.is_published ? "Published" : "Draft"}
+          {til.is_published ? "published" : "draft"}
         </span>
-        <small style={{ color: "var(--secondary)" }}>
+        <small className="til-item-date">
           {formatDate(til.created_at)}
         </small>
       </div>
@@ -102,8 +96,8 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            style={{ marginBottom: "0.5rem" }}
+            placeholder="title"
+            className="til-item-edit-input"
           />
           <textarea
             value={content}
@@ -115,37 +109,37 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div className="til-item-actions">
             <button
               onClick={handleUpdate}
               className="primary"
               disabled={loading}
             >
-              Save
+              save
             </button>
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
+            <button onClick={() => setIsEditing(false)}>cancel</button>
           </div>
         </div>
       ) : (
         <>
-          <h3 style={{ margin: "0 0 0.5rem 0" }}>{til.title}</h3>
-          <p style={{ marginBottom: "1rem", lineHeight: "1.6", color: "var(--secondary)" }}>
+          <h3 className="til-item-title">{til.title}</h3>
+          <p className="til-item-preview">
             {getPreviewText(til.content, 20)}
           </p>
-          <div style={{ marginBottom: "1rem" }}>
+          <div className="til-item-tags">
             {til.tags.map((tag) => (
               <span key={tag} className="tag">
                 #{tag}
               </span>
             ))}
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button onClick={() => setIsEditing(true)}>Edit</button>
+          <div className="til-item-actions">
+            <button onClick={() => setIsEditing(true)}>edit</button>
             <button onClick={togglePublish}>
-              {til.is_published ? "Unpublish" : "Publish"}
+              {til.is_published ? "unpublish" : "publish"}
             </button>
             <button onClick={handleDelete} className="danger">
-              Delete
+              delete
             </button>
           </div>
         </>

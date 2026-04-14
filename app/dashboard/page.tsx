@@ -17,6 +17,8 @@ export default function Dashboard() {
 
   
 
+  const [activeTab, setActiveTab] = useState<"add" | "list">("add");
+
   const fetchTils = useCallback(async () => {
     try {
       const res = await fetch("/api/til",{
@@ -36,6 +38,11 @@ export default function Dashboard() {
   useEffect(() => {
     fetchTils();
   }, []);
+
+  const handleSuccess = useCallback(() => {
+    fetchTils();
+    setActiveTab("list");
+  }, [fetchTils]);
 
   const allTags = useMemo(
     () => Array.from(new Set(tils.flatMap((til) => til.tags))),
@@ -91,51 +98,70 @@ export default function Dashboard() {
 
   return (
     <Container>
-      <div style={{ paddingBottom: "4rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2rem" }}>
-          <h1>Dashboard</h1>
-          <div className="badge badge-published" style={{ padding: "0.5rem 1rem" }}>
-            🔥 {streak} Day Streak
+      <div className="dashboard-container">
+        <div className="dashboard-header">
+          <div className="dashboard-tabs">
+            <button
+              className={`tab-btn ${activeTab === "add" ? "active" : ""}`}
+              onClick={() => setActiveTab("add")}
+            >
+              create til
+            </button>
+            <button
+              className={`tab-btn ${activeTab === "list" ? "active" : ""}`}
+              onClick={() => setActiveTab("list")}
+            >
+              learnings
+            </button>
+          </div>
+          <div className="badge badge-published dashboard-streak-badge">
+            🔥 {streak} day streak
           </div>
         </div>
-        
-        <div style={{ marginBottom: "2rem" }}>
+
+        {activeTab === "add" ? (
+          <>
+          <div className="dashboard-section">
+            <TilInput onSuccess={handleSuccess} />
+          </div>
+           <div className="dashboard-section mt-12">
+          <h2 className="mb-4 text-center">your contribution activity</h2>
           { tils.length > 0 && <ContributionHeatmap tils={tils} onDayClick={handleDayClick} /> }
         </div>
 
-        <TilInput onSuccess={fetchTils} />
-        
-
         {selectedDateTils && selectedDate && (
-          <div style={{ marginTop: "2rem" }}>
+          <div className="date-detail-card">
             <div className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <h3 style={{ margin: 0 }}>
-                  TILs for {new Date(selectedDate + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+              <div className="date-detail-header">
+                <h3 className="date-detail-title">
+                  tils for {new Date(selectedDate + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </h3>
-                <button onClick={clearSelectedDate} style={{ margin: 0 }}>
-                  Close
+                <button onClick={clearSelectedDate} className="date-detail-close-btn">
+                  close
                 </button>
               </div>
               <TilList tils={selectedDateTils} onUpdate={fetchTils} />
             </div>
           </div>
         )}
+          </>
+        ) : (
+          <div className="dashboard-section-large">
+            <TagFilter
+              tags={allTags}
+              selectedTag={selectedTag}
+              onSelectTag={setSelectedTag}
+            />
 
-        <div style={{ marginTop: "3rem" }}>
-          <h2>All Learnings</h2>
-          <TagFilter 
-            tags={allTags} 
-            selectedTag={selectedTag} 
-            onSelectTag={setSelectedTag} 
-          />
-          
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <TilList tils={filteredTils} onUpdate={fetchTils} />
-          )}
-        </div>
+            {loading ? (
+              <p>loading...</p>
+            ) : (
+              <TilList tils={filteredTils} onUpdate={fetchTils} />
+            )}
+          </div>
+        )}
+
+        
       </div>
     </Container>
   );

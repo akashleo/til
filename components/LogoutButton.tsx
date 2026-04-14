@@ -21,7 +21,7 @@ export default function LogoutButton() {
 
   return (
     <button onClick={handleLogout} className="danger" style={{ padding: "0.25rem 0.75rem", fontSize: "0.8rem" }}>
-      Logout
+      logout
     </button>
   );
 }

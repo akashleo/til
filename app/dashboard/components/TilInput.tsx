@@ -204,11 +204,11 @@ export default function TilInput({ onSuccess }: TilInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="til-form">
-      <h3>What did you learn today?</h3>
+      <h3>what did you learn today?</h3>
 
       <input
         type="text"
-        placeholder="Title..."
+        placeholder="title..."
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
@@ -221,17 +221,17 @@ export default function TilInput({ onSuccess }: TilInputProps) {
             <ToolbarButton
               onClick={() => handleInsert("heading")}
               icon={<Heading size={16} />}
-              label="Insert Heading"
+              label="insert heading"
             />
             <ToolbarButton
               onClick={() => handleInsert("list")}
               icon={<List size={16} />}
-              label="Insert List Item"
+              label="insert list item"
             />
             <ToolbarButton
               onClick={() => handleInsert("quote")}
               icon={<Quote size={16} />}
-              label="Insert Quote"
+              label="insert quote"
             />
           </div>
 
@@ -241,12 +241,12 @@ export default function TilInput({ onSuccess }: TilInputProps) {
             <ToolbarButton
               onClick={() => handleInsert("code-block")}
               icon={<Terminal size={16} />}
-              label="Insert Code Block"
+              label="insert code block"
             />
             <ToolbarButton
               onClick={() => handleInsert("inline-code")}
               icon={<Code size={16} />}
-              label="Insert Inline Code"
+              label="insert inline code"
             />
           </div>
 
@@ -256,13 +256,13 @@ export default function TilInput({ onSuccess }: TilInputProps) {
             <ToolbarButton
               onClick={() => setIsPreview(false)}
               icon={<Edit3 size={16} />}
-              label="Edit Mode"
+              label="edit mode"
               active={!isPreview}
             />
             <ToolbarButton
               onClick={() => setIsPreview(true)}
               icon={<Eye size={16} />}
-              label="Preview Mode"
+              label="preview mode"
               active={isPreview}
             />
           </div>
@@ -275,7 +275,7 @@ export default function TilInput({ onSuccess }: TilInputProps) {
           ) : (
             <textarea
               ref={textareaRef}
-              placeholder="Write your TIL here...&#10;&#10;Use Markdown for formatting:&#10;- ## for headings&#10;- `backticks` for inline code&#10;- ``` for code blocks&#10;- - for lists&#10;- > for quotes"
+              placeholder="write your til here...&#10;&#10;use markdown for formatting:&#10;- ## for headings&#10;- `backticks` for inline code&#10;- ``` for code blocks&#10;- - for lists&#10;- > for quotes"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
@@ -288,230 +288,22 @@ export default function TilInput({ onSuccess }: TilInputProps) {
         {/* Helper Text */}
         {!isPreview && (
           <p className="helper-text">
-            <strong>Tip:</strong> Use the toolbar above or type Markdown directly.
-            Click the eye icon to preview.
+            <strong>tip:</strong> use the toolbar above or type markdown directly.
+            click the eye icon to preview.
           </p>
         )}
       </div>
 
       <input
         type="text"
-        placeholder="Tags (comma-separated)"
+        placeholder="tags (comma-separated)"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
       />
 
       <button type="submit" className="primary" disabled={loading}>
-        {loading ? "Saving..." : "Save TIL"}
+        {loading ? "saving..." : "save til"}
       </button>
-
-      {/* Scoped Styles */}
-      <style jsx>{`
-        .til-form {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .til-form h3 {
-          margin: 0 0 0.5rem 0;
-          font-size: 1.25rem;
-          font-weight: 600;
-        }
-
-        .til-form input[type="text"] {
-          padding: 0.75rem 1rem;
-          border: 1px solid #e5e7eb;
-          border-radius: 0.5rem;
-          font-size: 1rem;
-          background: white;
-          transition: border-color 0.2s;
-        }
-
-        .til-form input[type="text"]:focus {
-          outline: none;
-          border-color: #3b82f6;
-        }
-
-        .editor-container {
-          border: 1px solid #e5e7eb;
-          border-radius: 0.5rem;
-          overflow: hidden;
-        }
-
-        .toolbar {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          padding: 0.5rem;
-          background: #f9fafb;
-          border-bottom: 1px solid #e5e7eb;
-          flex-wrap: wrap;
-        }
-
-        .toolbar-group {
-          display: flex;
-          gap: 0.25rem;
-        }
-
-        .toolbar-divider {
-          width: 1px;
-          height: 1.25rem;
-          background: #d1d5db;
-          margin: 0 0.25rem;
-        }
-
-        .toolbar-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 2rem;
-          height: 2rem;
-          border: none;
-          border-radius: 0.375rem;
-          background: transparent;
-          color: #4b5563;
-          cursor: pointer;
-          transition: all 0.15s;
-        }
-
-        .toolbar-btn:hover {
-          background: #e5e7eb;
-          color: #1f2937;
-        }
-
-        .toolbar-btn.active {
-          background: #3b82f6;
-          color: white;
-        }
-
-        .editor-content {
-          min-height: 200px;
-        }
-
-        .editor-textarea {
-          width: 100%;
-          padding: 1rem;
-          border: none;
-          font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco,
-            "Cascadia Code", "Segoe UI Mono", "Roboto Mono", monospace;
-          font-size: 0.875rem;
-          line-height: 1.6;
-          resize: vertical;
-          background: white;
-        }
-
-        .editor-textarea:focus {
-          outline: none;
-        }
-
-        .helper-text {
-          margin: 0;
-          padding: 0.5rem 1rem;
-          font-size: 0.75rem;
-          color: #6b7280;
-          background: #f9fafb;
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .preview-empty {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 200px;
-          padding: 2rem;
-          color: #9ca3af;
-          font-style: italic;
-        }
-
-        .markdown-preview {
-          padding: 1rem;
-          min-height: 200px;
-          background: white;
-        }
-
-        .markdown-preview :global(h1),
-        .markdown-preview :global(h2),
-        .markdown-preview :global(h3) {
-          margin-top: 1.5rem;
-          margin-bottom: 0.75rem;
-          font-weight: 600;
-          line-height: 1.3;
-        }
-
-        .markdown-preview :global(h1) {
-          font-size: 1.5rem;
-        }
-
-        .markdown-preview :global(h2) {
-          font-size: 1.25rem;
-        }
-
-        .markdown-preview :global(h3) {
-          font-size: 1.125rem;
-        }
-
-        .markdown-preview :global(p) {
-          margin-bottom: 0.75rem;
-          line-height: 1.6;
-        }
-
-        .markdown-preview :global(ul),
-        .markdown-preview :global(ol) {
-          margin-bottom: 0.75rem;
-          padding-left: 1.5rem;
-        }
-
-        .markdown-preview :global(li) {
-          margin-bottom: 0.25rem;
-        }
-
-        .markdown-preview :global(blockquote) {
-          margin: 1rem 0;
-          padding: 0.5rem 1rem;
-          border-left: 4px solid #e5e7eb;
-          background: #f9fafb;
-          color: #4b5563;
-          font-style: italic;
-        }
-
-        .markdown-preview :global(pre) {
-          margin: 1rem 0;
-          border-radius: 0.5rem;
-          overflow: hidden;
-        }
-
-        .markdown-preview :global(.inline-code) {
-          background: #f3f4f6;
-          padding: 0.125rem 0.375rem;
-          border-radius: 0.25rem;
-          font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco,
-            "Cascadia Code", "Segoe UI Mono", "Roboto Mono", monospace;
-          font-size: 0.875em;
-          color: #db2777;
-        }
-
-        .primary {
-          padding: 0.75rem 1.5rem;
-          background: #3b82f6;
-          color: white;
-          border: none;
-          border-radius: 0.5rem;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .primary:hover:not(:disabled) {
-          background: #2563eb;
-        }
-
-        .primary:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-      `}</style>
     </form>
   );
 }
