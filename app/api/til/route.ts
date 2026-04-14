@@ -30,7 +30,15 @@ export async function GET(request: Request) {
     if (!isPublished && !isAdmin()) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    query = query.eq("is_published", isPublished);
+    // For admins, don't filter by is_published - show all TILs
+    if (!isAdmin()) {
+      query = query.eq("is_published", isPublished);
+    }
+  } else {
+    // No is_published filter specified - non-admins only see published
+    if (!isAdmin()) {
+      query = query.eq("is_published", true);
+    }
   }
 
   const { data, error } = await query;

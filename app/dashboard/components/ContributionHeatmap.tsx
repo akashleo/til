@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { TIL } from "@/types/til";
 
 interface ContributionHeatmapProps {
@@ -60,12 +60,15 @@ function getMonthLabel(dateString: string): string {
   return date.toLocaleDateString("en-US", { month: "short" });
 }
 
-export default function ContributionHeatmap({
+function ContributionHeatmap({
   tils,
   onDayClick,
 }: ContributionHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<DayData | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visibleWeekCount, setVisibleWeekCount] = useState<number | null>(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   // Transform TIL data into date -> count map
   const dateCountMap = useMemo(() => {
@@ -114,7 +117,7 @@ export default function ContributionHeatmap({
   }, [dateCountMap]);
 
   // Calculate weeks for grid layout
-  const weeks = useMemo(() => {
+  const allWeeks = useMemo(() => {
     const weeksArray: DayData[][] = [];
 
     // Find the first Sunday to align the grid properly
@@ -136,6 +139,48 @@ export default function ContributionHeatmap({
 
     return weeksArray;
   }, [calendarData]);
+
+  // Calculate visible weeks based on container width
+  useEffect(() => {
+    const calculateVisibleWeeks = () => {
+      if (!containerRef.current) return;
+      
+      const containerWidth = containerRef.current.clientWidth - 32; // Subtract padding
+      const weekWidth = 15; // 12px cell + 3px gap
+      const maxWeeks = Math.floor(containerWidth / weekWidth);
+      
+      // Always show at least 12 weeks, but prefer to show all if they fit
+      setVisibleWeekCount(Math.min(maxWeeks, allWeeks.length));
+    };
+
+    const handleResize = () => {
+      calculateVisibleWeeks();
+      setIsSmallScreen(window.innerWidth < 640);
+    };
+    
+    handleResize();
+    
+    const resizeObserver = new ResizeObserver(calculateVisibleWeeks);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    window.addEventListener("resize", handleResize);
+    
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [allWeeks.length]);
+
+  // Trim weeks from the left to fit container, keeping today visible
+  const weeks = useMemo(() => {
+    if (visibleWeekCount === null || allWeeks.length <= visibleWeekCount) {
+      return allWeeks;
+    }
+    // Take the last N weeks so today is always visible
+    return allWeeks.slice(allWeeks.length - visibleWeekCount);
+  }, [allWeeks, visibleWeekCount]);
 
   // Calculate month labels for the top of the grid
   const monthLabels = useMemo(() => {
@@ -217,10 +262,10 @@ export default function ContributionHeatmap({
   );
 
   return (
-    <div style={{ border: "1px solid var(--border)", borderRadius: "8px", padding: "1.5rem", marginBottom: "1rem" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        <h3 style={{ margin: 0 }}>Contribution Activity</h3>
-        <div style={{ display: "flex", gap: "1rem", fontSize: "0.875rem", color: "var(--secondary)" }}>
+    <div ref={containerRef} style={{ border: "1px solid var(--border)", borderRadius: "8px", padding: "1.5rem", marginBottom: "1rem" }}>
+      <div style={{ display: "flex", flexDirection: isSmallScreen ? "column" : "row", alignItems: isSmallScreen ? "flex-start" : "center", justifyContent: "space-between", marginBottom: "1rem", gap: isSmallScreen ? "0.5rem" : "0" }}>
+        <h3 style={{ margin: 0, fontSize: isSmallScreen ? "0.875rem" : "1rem" }}>Contribution Activity</h3>
+        <div style={{ display: "flex", gap: isSmallScreen ? "0.75rem" : "1rem", fontSize: isSmallScreen ? "0.75rem" : "0.875rem", color: "var(--secondary)" }}>
           <span>
             <strong>{stats.totalContributions}</strong> contributions
           </span>
@@ -234,7 +279,7 @@ export default function ContributionHeatmap({
       </div>
 
       {/* Month labels */}
-      <div style={{ display: "flex", marginLeft: "2rem", marginBottom: "0.25rem", position: "relative", height: "1rem" }}>
+      <div style={{ display: "flex", marginBottom: "0.25rem", position: "relative", height: "1rem" }}>
         {monthLabels.map((label, index) => (
           <div
             key={index}
@@ -253,13 +298,13 @@ export default function ContributionHeatmap({
       {/* Heatmap grid */}
       <div style={{ display: "flex" }}>
         {/* Day labels */}
-        <div style={{ display: "flex", flexDirection: "column", marginRight: "0.5rem", fontSize: "0.75rem", color: "var(--secondary)" }}>
+        {/* <div style={{ display: "flex", flexDirection: "column", marginRight: "0.5rem", fontSize: "0.75rem", color: "var(--secondary)" }}>
           {DAYS_OF_WEEK.filter((_, i) => i % 2 === 1).map((day) => (
             <div key={day} style={{ height: "12px", display: "flex", alignItems: "center", marginBottom: "3px" }}>
               {day}
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Grid */}
         <div style={{ display: "flex", gap: "3px" }}>
@@ -344,3 +389,5 @@ export default function ContributionHeatmap({
     </div>
   );
 }
+
+export default ContributionHeatmap

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Container from "@/components/Container";
 import { TIL } from "@/types/til";
 import TilInput from "./components/TilInput";
@@ -15,9 +15,13 @@ export default function Dashboard() {
   const [selectedDateTils, setSelectedDateTils] = useState<TIL[] | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const fetchTils = async () => {
+  
+
+  const fetchTils = useCallback(async () => {
     try {
-      const res = await fetch("/api/til?is_published=false");
+      const res = await fetch("/api/til",{
+        cache: "no-store",
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setTils(data);
@@ -27,29 +31,33 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTils();
   }, []);
 
-  const allTags = Array.from(new Set(tils.flatMap((til) => til.tags)));
-  
-  const filteredTils = selectedTag
-    ? tils.filter((til) => til.tags.includes(selectedTag))
-    : tils;
+  const allTags = useMemo(
+    () => Array.from(new Set(tils.flatMap((til) => til.tags))),
+    [tils]
+  );
 
-  const calculateStreak = () => {
+  const filteredTils = useMemo(
+    () => (selectedTag ? tils.filter((til) => til.tags.includes(selectedTag)) : tils),
+    [tils, selectedTag]
+  );
+
+  const streak = useMemo(() => {
     if (tils.length === 0) return 0;
-    
+
     const dates = tils
       .map((t) => new Date(t.created_at).toDateString())
       .filter((value, index, self) => self.indexOf(value) === index);
-    
+
     let streak = 0;
     const today = new Date().toDateString();
     let currentCheck = new Date();
-    
+
     // If no TIL today, check if there was one yesterday to keep streak alive
     if (dates[0] !== today) {
       const yesterday = new Date();
@@ -67,19 +75,19 @@ export default function Dashboard() {
       }
     }
     return streak;
-  };
+  }, [tils]);
 
-  const streak = calculateStreak();
-
-  const handleDayClick = (date: string, dayTils: TIL[]) => {
+  const handleDayClick = useCallback((date: string, dayTils: TIL[]) => {
     setSelectedDate(date);
     setSelectedDateTils(dayTils);
-  };
+  }, []);
 
-  const clearSelectedDate = () => {
+  const clearSelectedDate = useCallback(() => {
     setSelectedDate(null);
     setSelectedDateTils(null);
-  };
+  }, []);
+
+  console.log("tils", tils);
 
   return (
     <Container>
@@ -92,10 +100,11 @@ export default function Dashboard() {
         </div>
         
         <div style={{ marginBottom: "2rem" }}>
-          <ContributionHeatmap tils={tils} onDayClick={handleDayClick} />
+          { tils.length > 0 && <ContributionHeatmap tils={tils} onDayClick={handleDayClick} /> }
         </div>
 
         <TilInput onSuccess={fetchTils} />
+        
 
         {selectedDateTils && selectedDate && (
           <div style={{ marginTop: "2rem" }}>
