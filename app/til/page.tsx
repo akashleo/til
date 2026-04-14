@@ -2,7 +2,7 @@ import Link from "next/link";
 import Container from "@/components/Container";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getPreviewText } from "@/lib/utils";
 import { TIL } from "@/types/til";
 
 export const revalidate = 60; // Revalidate every 60 seconds
@@ -44,9 +44,8 @@ export default async function PublicBlog() {
                     {til.title}
                   </Link>
                 </h2>
-                <p style={{ color: "var(--secondary)", marginBottom: "1rem" }}>
-                  {til.content.substring(0, 150)}
-                  {til.content.length > 150 ? "..." : ""}
+                <p style={{ color: "var(--secondary)", marginBottom: "1rem", lineHeight: "1.6" }}>
+                  {getPreviewText(til.content, 25)}
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                   {til.tags.map((tag) => (

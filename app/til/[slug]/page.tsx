@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "@/components/Container";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { formatDate } from "@/lib/utils";
@@ -47,8 +48,8 @@ export default async function TilPage({ params }: TilPageProps) {
             {til.title}
           </h1>
           
-          <div style={{ fontSize: "1.2rem", whiteSpace: "pre-wrap", marginBottom: "2rem" }}>
-            {til.content}
+          <div style={{ marginBottom: "2rem" }}>
+            <MarkdownRenderer content={til.content} />
           </div>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", borderTop: "1px solid var(--border)", paddingTop: "2rem" }}>

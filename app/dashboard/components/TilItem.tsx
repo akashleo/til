@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { TIL } from "@/types/til";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getPreviewText } from "@/lib/utils";
 
 interface TilItemProps {
   til: TIL;
@@ -129,8 +129,8 @@ export default function TilItem({ til, onUpdate }: TilItemProps) {
       ) : (
         <>
           <h3 style={{ margin: "0 0 0.5rem 0" }}>{til.title}</h3>
-          <p style={{ whiteSpace: "pre-wrap", marginBottom: "1rem" }}>
-            {til.content}
+          <p style={{ marginBottom: "1rem", lineHeight: "1.6", color: "var(--secondary)" }}>
+            {getPreviewText(til.content, 20)}
           </p>
           <div style={{ marginBottom: "1rem" }}>
             {til.tags.map((tag) => (
