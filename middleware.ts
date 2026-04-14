@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protect dashboard routes
-  if (pathname === "/" || pathname.startsWith("/dashboard") || pathname.startsWith("/api/til")) {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/til")) {
     if (!isValid) {
       // If it's an API route, return 401
       if (pathname.startsWith("/api/")) {
@@ -49,5 +49,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/api/til", "/api/til/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/api/til", "/api/til/:path*", "/login"],
 };

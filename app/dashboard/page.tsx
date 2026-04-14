@@ -87,7 +87,7 @@ export default function Dashboard() {
     setSelectedDateTils(null);
   }, []);
 
-  console.log("tils", tils);
+ 
 
   return (
     <Container>
@@ -123,7 +123,7 @@ export default function Dashboard() {
         )}
 
         <div style={{ marginTop: "3rem" }}>
-          <h2>Unpublished Learnings</h2>
+          <h2>All Learnings</h2>
           <TagFilter 
             tags={allTags} 
             selectedTag={selectedTag} 

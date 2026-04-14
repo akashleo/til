@@ -11,12 +11,12 @@ export default function Navbar() {
     <nav className="navbar">
       <Container>
         <div className="navbar-content">
-          <Link href="/" className="nav-brand">
+          <Link href="/til" className="nav-brand">
             <strong>TIL</strong>
           </Link>
           <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-            <Link href="/til" className="nav-link">
-              Public Blog
+            <Link href="/dashboard" className="nav-link">
+              Dashboard
             </Link>
             {isLoggedIn && <LogoutButton />}
           </div>
