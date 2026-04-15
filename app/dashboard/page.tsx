@@ -105,7 +105,7 @@ export default function Dashboard() {
               className={`tab-btn ${activeTab === "add" ? "active" : ""}`}
               onClick={() => setActiveTab("add")}
             >
-              create til
+              create
             </button>
             <button
               className={`tab-btn ${activeTab === "list" ? "active" : ""}`}

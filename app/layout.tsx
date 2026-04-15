@@ -6,6 +6,7 @@ import { sora, recursive } from "./fonts";
 export const metadata: Metadata = {
   title: "Today I Learned",
   description: "A personal knowledge tracking tool",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
