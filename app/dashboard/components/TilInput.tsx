@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -168,14 +168,22 @@ export default function TilInput({ onSuccess }: TilInputProps) {
   const [loading, setLoading] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
 
+  // Link insertion UI state
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
+  const [linkError, setLinkError] = useState("");
+  const [savedSelection, setSavedSelection] = useState<{ start: number; end: number } | null>(null);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null);
 
   const handleInsert = useCallback((action: InsertAction) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     if (action === "link") {
-      handleLinkInsert();
+      openLinkInput();
       return;
     }
 
@@ -184,41 +192,82 @@ export default function TilInput({ onSuccess }: TilInputProps) {
     setContent(newValue);
   }, []);
 
-  const handleLinkInsert = useCallback(() => {
+  const openLinkInput = useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     const { selectionStart, selectionEnd, value } = textarea;
     const selectedText = value.substring(selectionStart, selectionEnd);
 
-    const url = window.prompt("Enter URL:", "https://");
-    if (!url) return;
+    setSavedSelection({ start: selectionStart, end: selectionEnd });
+    setLinkText(selectedText || "");
+    setLinkUrl("https://");
+    setLinkError("");
+    setShowLinkInput(true);
+  }, []);
 
-    const isSafe =
+  const closeLinkInput = useCallback(() => {
+    setShowLinkInput(false);
+    setLinkUrl("");
+    setLinkText("");
+    setLinkError("");
+    setSavedSelection(null);
+    textareaRef.current?.focus();
+  }, []);
+
+  const validateUrl = (url: string): boolean => {
+    return (
       url.startsWith("/") ||
       url.startsWith("http://") ||
       url.startsWith("https://") ||
       url.startsWith("mailto:") ||
-      url.startsWith("tel:");
+      url.startsWith("tel:")
+    );
+  };
 
-    if (!isSafe) {
-      alert("Invalid URL. Only http, https, mailto, tel, and internal paths are allowed.");
+  const handleLinkSubmit = useCallback(() => {
+    if (!validateUrl(linkUrl)) {
+      setLinkError("Invalid URL. Only http, https, mailto, tel, and internal paths are allowed.");
       return;
     }
 
-    const linkText = selectedText || "link text";
+    const textarea = textareaRef.current;
+    if (!textarea || !savedSelection) return;
+
+    const { start, end } = savedSelection;
+    const displayText = linkText.trim() || "link text";
     const newText =
-      value.substring(0, selectionStart) +
-      `[${linkText}](${url})` +
-      value.substring(selectionEnd);
+      textarea.value.substring(0, start) +
+      `[${displayText}](${linkUrl})` +
+      textarea.value.substring(end);
 
     textarea.value = newText;
     setContent(newText);
 
+    closeLinkInput();
+
     textarea.focus();
-    const cursorPos = selectionStart + linkText.length + url.length + 4;
+    const cursorPos = start + displayText.length + linkUrl.length + 4;
     textarea.setSelectionRange(cursorPos, cursorPos);
-  }, []);
+  }, [linkUrl, linkText, savedSelection, closeLinkInput]);
+
+  const handleUrlKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleLinkSubmit();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeLinkInput();
+    }
+  };
+
+  // Auto-focus URL input when link UI opens
+  useEffect(() => {
+    if (showLinkInput && urlInputRef.current) {
+      urlInputRef.current.focus();
+      urlInputRef.current.select();
+    }
+  }, [showLinkInput]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -316,6 +365,59 @@ export default function TilInput({ onSuccess }: TilInputProps) {
             />
           </div>
         </div>
+
+        {/* Link Insertion UI */}
+        {showLinkInput && !isPreview && (
+          <div className="link-input-container">
+            <div className="link-input-fields">
+              <div className="link-input-group">
+                <label htmlFor="link-url">URL</label>
+                <input
+                  ref={urlInputRef}
+                  id="link-url"
+                  type="text"
+                  value={linkUrl}
+                  onChange={(e) => {
+                    setLinkUrl(e.target.value);
+                    setLinkError("");
+                  }}
+                  onKeyDown={handleUrlKeyDown}
+                  placeholder="https://example.com"
+                  className="link-input"
+                />
+              </div>
+              <div className="link-input-group">
+                <label htmlFor="link-text">Text (optional)</label>
+                <input
+                  id="link-text"
+                  type="text"
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  onKeyDown={handleUrlKeyDown}
+                  placeholder="link text"
+                  className="link-input"
+                />
+              </div>
+            </div>
+            {linkError && <span className="link-error">{linkError}</span>}
+            <div className="link-actions">
+              <button
+                type="button"
+                onClick={handleLinkSubmit}
+                className="link-btn-add"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={closeLinkInput}
+                className="link-btn-cancel"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Editor / Preview Toggle */}
         <div className="editor-content">

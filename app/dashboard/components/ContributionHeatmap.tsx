@@ -16,12 +16,12 @@ interface DayData {
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Normalize date to YYYY-MM-DD format using UTC to avoid timezone issues
+// Normalize date to YYYY-MM-DD format using local timezone
 function normalizeDate(dateString: string): string {
   const date = new Date(dateString);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -36,7 +36,7 @@ function getLevelClass(count: number): string {
 
 // Format date for display
 function formatDisplayDate(dateString: string): string {
-  const date = new Date(dateString + "T00:00:00Z");
+  const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     weekday: "short",
     year: "numeric",
@@ -47,7 +47,7 @@ function formatDisplayDate(dateString: string): string {
 
 // Get month label from date
 function getMonthLabel(dateString: string): string {
-  const date = new Date(dateString + "T00:00:00Z");
+  const date = new Date(dateString);
   return date.toLocaleDateString("en-US", { month: "short" });
 }
 
@@ -79,19 +79,19 @@ function ContributionHeatmap({
   const calendarData = useMemo(() => {
     const data: DayData[] = [];
     const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
     // Start from 365 days ago
     const startDate = new Date(today);
-    startDate.setUTCDate(startDate.getUTCDate() - 364);
+    startDate.setDate(startDate.getDate() - 364);
 
     for (let i = 0; i < 365; i++) {
       const currentDate = new Date(startDate);
-      currentDate.setUTCDate(startDate.getUTCDate() + i);
+      currentDate.setDate(startDate.getDate() + i);
 
-      const year = currentDate.getUTCFullYear();
-      const month = String(currentDate.getUTCMonth() + 1).padStart(2, "0");
-      const day = String(currentDate.getUTCDate()).padStart(2, "0");
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
       const dateString = `${year}-${month}-${day}`;
 
       const dayTils = dateCountMap.get(dateString) || [];
@@ -112,7 +112,7 @@ function ContributionHeatmap({
 
     // Find the first Sunday to align the grid properly
     const firstDay = calendarData[0];
-    const firstDayOfWeek = new Date(firstDay.date + "T00:00:00Z").getUTCDay();
+    const firstDayOfWeek = new Date(firstDay.date).getDay();
 
     // Pad the beginning with empty days if needed
     const paddedDays: (DayData | null)[] = [];
@@ -184,36 +184,55 @@ function ContributionHeatmap({
   }, [weeks]);
 
   // Calculate streak statistics
-  const stats = useMemo(() => {
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
-    let totalContributions = 0;
+const stats = useMemo(() => {
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let tempStreak = 0;
+  let totalContributions = 0;
 
-    // Calculate current streak (from today backwards)
-    const reversedData = [...calendarData].reverse();
-    let streakActive = true;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    for (const day of reversedData) {
-      if (day.count > 0) {
-        totalContributions += day.count;
-        if (streakActive) {
-          currentStreak++;
-        }
-        tempStreak++;
-      } else {
-        if (streakActive) {
-          streakActive = false;
-        }
-        longestStreak = Math.max(longestStreak, tempStreak);
-        tempStreak = 0;
+  const todayStr = normalizeDate(today.toISOString());
+
+  const reversedData = [...calendarData].reverse();
+
+  let started = false;
+
+  for (const day of reversedData) {
+    totalContributions += day.count;
+
+    if (!started) {
+      // Skip today if no contributions
+      if (day.date === todayStr && day.count === 0) {
+        continue;
       }
+      started = true;
     }
 
-    longestStreak = Math.max(longestStreak, tempStreak);
+    if (day.count > 0) {
+      currentStreak++;
+      tempStreak++;
+    } else {
+      longestStreak = Math.max(longestStreak, tempStreak);
+      break;
+    }
+  }
 
-    return { currentStreak, longestStreak, totalContributions };
-  }, [calendarData]);
+  // Longest streak calculation (full scan)
+  tempStreak = 0;
+  for (const day of calendarData) {
+    if (day.count > 0) {
+      tempStreak++;
+    } else {
+      longestStreak = Math.max(longestStreak, tempStreak);
+      tempStreak = 0;
+    }
+  }
+  longestStreak = Math.max(longestStreak, tempStreak);
+
+  return { currentStreak, longestStreak, totalContributions };
+}, [calendarData]);
 
   const handleMouseEnter = useCallback(
     (day: DayData, event: React.MouseEvent<HTMLDivElement>) => {
