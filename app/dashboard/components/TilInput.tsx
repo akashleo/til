@@ -453,7 +453,7 @@ export default function TilInput({ onSuccess }: TilInputProps) {
       />
 
       <button type="submit" className="primary" disabled={loading}>
-        {loading ? "saving..." : "save til"}
+        {loading ? "saving..." : "save"}
       </button>
     </form>
   );
